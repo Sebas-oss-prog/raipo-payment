@@ -86,7 +86,6 @@
     <div class="container" id="check-screen" style="display: none;">
         <h2>✅ Чек оплаты</h2>
         <div class="check" id="check-content"></div>
-
         <button class="close" onclick="closeApp()">❌ Закрыть</button>
     </div>
 
@@ -112,18 +111,21 @@
                 cash: "Наличными при получении"
             };
 
-            tg.showPopup({
-                title: "Подтверждение оплаты",
-                message: `Оплатить ${amount.toFixed(2)} ₽ через ${methodNames[method]}?`,
-                buttons: [
-                    { id: "cancel", type: "cancel" },
-                    { id: "ok", type: "ok" }
-                ]
-            }, function(clicked) {
-                if (clicked === "ok") {
-                    showCheck();
+            tg.showPopup(
+                {
+                    title: "Подтверждение оплаты",
+                    message: `Оплатить ${amount.toFixed(2)} ₽ через ${methodNames[method]}?`,
+                    buttons: [
+                        { id: "cancel", type: "cancel" },
+                        { id: "ok", type: "ok" }
+                    ]
+                },
+                function(clicked) {
+                    if (clicked === "ok") {
+                        showCheck();
+                    }
                 }
-            });
+            );
         }
 
         function showCheck() {
