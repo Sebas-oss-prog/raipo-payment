@@ -6,87 +6,676 @@
     <title>Оплата — Слободское РайПО</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            margin: 0;
-            padding: 15px;
+        :root {
+            --bg: #f4f1ea;
+            --bg-soft: #ebe6dc;
+            --card: rgba(255, 255, 255, 0.82);
+            --card-strong: rgba(255, 255, 255, 0.92);
+            --line: rgba(71, 60, 40, 0.08);
+            --text: #1f1a14;
+            --muted: #6c6257;
+            --gold: #c9a96b;
+            --gold-deep: #a98647;
+            --green: #1f7a52;
+            --green-2: #3da676;
+            --blue: #234c8c;
+            --orange: #b8771b;
+            --shadow: 0 24px 80px rgba(54, 42, 24, 0.16);
+            --radius-xl: 28px;
+            --radius-lg: 22px;
+            --radius-md: 18px;
         }
 
-        .container {
-            background: white;
-            border-radius: 16px;
-            padding: 25px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            text-align: center;
-            max-width: 500px;
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(255,255,255,0.95), transparent 35%),
+                radial-gradient(circle at bottom right, rgba(201,169,107,0.18), transparent 30%),
+                linear-gradient(145deg, var(--bg), var(--bg-soft));
+            overflow-x: hidden;
+        }
+
+        .noise,
+        .orb,
+        .grid {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        .grid {
+            background-image:
+                linear-gradient(rgba(255,255,255,0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.05) 1px, transparent 1px);
+            background-size: 22px 22px;
+            mask-image: radial-gradient(circle at center, black, transparent 85%);
+            opacity: 0.25;
+        }
+
+        .noise {
+            opacity: 0.05;
+            background-image:
+                radial-gradient(circle at 20% 20%, #000 0.6px, transparent 0.7px),
+                radial-gradient(circle at 80% 30%, #000 0.6px, transparent 0.7px),
+                radial-gradient(circle at 60% 80%, #000 0.6px, transparent 0.7px);
+            background-size: 26px 26px;
+        }
+
+        .orb {
+            filter: blur(40px);
+            opacity: 0.55;
+        }
+
+        .orb.one {
+            inset: auto auto -60px -80px;
+            width: 260px;
+            height: 260px;
+            border-radius: 50%;
+            background: rgba(61, 166, 118, 0.18);
+            animation: drift 8s ease-in-out infinite;
+        }
+
+        .orb.two {
+            inset: -80px -50px auto auto;
+            width: 240px;
+            height: 240px;
+            border-radius: 50%;
+            background: rgba(201, 169, 107, 0.18);
+            animation: drift 10s ease-in-out infinite reverse;
+        }
+
+        .wrap {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 540px;
             margin: 0 auto;
+            padding: 22px 14px 34px;
+        }
+
+        .shell {
+            position: relative;
+            border-radius: 34px;
+            padding: 1px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(201,169,107,0.4), rgba(255,255,255,0.75));
+            box-shadow: var(--shadow);
+        }
+
+        .card {
+            background: linear-gradient(180deg, var(--card-strong), var(--card));
+            backdrop-filter: blur(18px);
+            border-radius: 33px;
+            padding: 22px 18px 20px;
+            border: 1px solid rgba(255,255,255,0.65);
+        }
+
+        .screen {
+            display: none;
+            animation: fadeUp 0.45s ease;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+
+        .brand {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.75);
+            border: 1px solid var(--line);
+            font-size: 14px;
+            font-weight: 700;
+            box-shadow: 0 8px 22px rgba(60, 49, 30, 0.06);
+        }
+
+        .brand-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--gold), var(--gold-deep));
+            box-shadow: 0 0 12px rgba(201, 169, 107, 0.7);
+        }
+
+        .secure {
+            font-size: 13px;
+            color: var(--muted);
+            padding: 10px 12px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.62);
+            border: 1px solid var(--line);
+        }
+
+        h1, h2 {
+            margin: 0;
+            line-height: 1.14;
+            letter-spacing: -0.02em;
+        }
+
+        h1 {
+            font-size: 31px;
         }
 
         h2 {
-            color: #2e7d32;
+            font-size: 27px;
+            text-align: center;
         }
 
-        .amount {
-            font-size: 28px;
-            font-weight: bold;
-            color: #1b5e20;
-            margin: 15px 0;
+        .sub {
+            margin: 12px 0 0;
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        .hero {
+            margin-top: 18px;
+            padding: 20px;
+            border-radius: var(--radius-xl);
+            background:
+                linear-gradient(135deg, rgba(35,76,140,0.96), rgba(31,122,82,0.94)),
+                linear-gradient(180deg, rgba(255,255,255,0.06), rgba(255,255,255,0));
+            color: white;
+            box-shadow: 0 22px 38px rgba(35, 76, 140, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: auto -40px -50px auto;
+            width: 180px;
+            height: 180px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: -60px auto auto -40px;
+            width: 140px;
+            height: 140px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.08);
+        }
+
+        .hero-label {
+            font-size: 13px;
+            opacity: 0.84;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .hero-amount {
+            margin-top: 12px;
+            font-size: 36px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero-note {
+            margin-top: 8px;
+            font-size: 14px;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }
+
+        .method-list {
+            display: grid;
+            gap: 12px;
+            margin-top: 18px;
         }
 
         button {
             width: 100%;
-            padding: 16px;
-            margin: 12px 0;
-            font-size: 17px;
             border: none;
-            border-radius: 12px;
-            color: white;
+            border-radius: var(--radius-lg);
+            padding: 16px 18px;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+        }
+
+        button:active {
+            transform: scale(0.985);
+        }
+
+        .pay-btn {
+            color: white;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .pay-btn::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(120deg, transparent, rgba(255,255,255,0.14), transparent);
+            transform: translateX(-100%);
+            animation: shine 3.2s linear infinite;
+        }
+
+        .pay-btn span {
+            position: relative;
+            z-index: 1;
         }
 
         .sbp {
-            background: #4caf50;
+            background: linear-gradient(135deg, #2f9863, #1f7a52);
+            box-shadow: 0 14px 28px rgba(31, 122, 82, 0.22);
         }
 
-        .card {
-            background: #2196f3;
+        .card-pay {
+            background: linear-gradient(135deg, #315ba3, #234c8c);
+            box-shadow: 0 14px 28px rgba(35, 76, 140, 0.22);
         }
 
         .cash {
-            background: #ff9800;
+            background: linear-gradient(135deg, #ca8a2e, #b8771b);
+            box-shadow: 0 14px 28px rgba(184, 119, 27, 0.22);
         }
 
-        .close {
-            background: #666;
-            margin-top: 30px;
+        .ghost {
+            background: linear-gradient(135deg, #4f5761, #3f4750);
+            color: white;
+            box-shadow: 0 14px 28px rgba(63, 71, 80, 0.2);
         }
 
-        .check {
-            background: #f9f9f9;
-            border: 2px dashed #2e7d32;
-            border-radius: 12px;
+        .success-stage {
+            text-align: center;
+            padding: 10px 4px 6px;
+        }
+
+        .progress-wrap {
+            position: relative;
+            width: 188px;
+            height: 188px;
+            margin: 10px auto 20px;
+        }
+
+        .progress-back,
+        .progress-fill,
+        .progress-inner,
+        .progress-glow {
+            position: absolute;
+            inset: 0;
+            border-radius: 50%;
+        }
+
+        .progress-back {
+            background: conic-gradient(from -90deg, rgba(0,0,0,0.05), rgba(0,0,0,0.05));
+        }
+
+        .progress-fill {
+            background: conic-gradient(
+                from -90deg,
+                var(--gold),
+                #d8bd88,
+                #e9d7b5,
+                var(--green-2),
+                var(--green),
+                var(--gold)
+            );
+            mask: radial-gradient(farthest-side, transparent calc(100% - 13px), black 0);
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 13px), black 0);
+            transform: rotate(0deg);
+        }
+
+        .progress-fill.animate {
+            animation: sweep 1.7s cubic-bezier(.25,.9,.25,1) forwards;
+        }
+
+        .progress-glow {
+            filter: blur(14px);
+            opacity: 0.45;
+            background: conic-gradient(
+                from -90deg,
+                rgba(201,169,107,0.8),
+                rgba(61,166,118,0.9),
+                rgba(201,169,107,0.8)
+            );
+            mask: radial-gradient(farthest-side, transparent calc(100% - 18px), black 0);
+            -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 18px), black 0);
+        }
+
+        .progress-inner {
+            inset: 14px;
+            background:
+                radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(255,255,255,0.78)),
+                linear-gradient(180deg, rgba(255,255,255,0.92), rgba(242,238,231,0.95));
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.9),
+                0 20px 36px rgba(58, 47, 31, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .progress-center {
+            width: 104px;
+            height: 104px;
+            border-radius: 50%;
+            background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(243,239,233,0.95));
+            border: 1px solid rgba(71,60,40,0.07);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.95),
+                0 12px 22px rgba(71,60,40,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spinner-lines {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 3px solid rgba(31,122,82,0.14);
+            border-top-color: var(--green);
+            animation: spin 0.8s linear infinite;
+            transition: opacity 0.25s ease;
+        }
+
+        .spinner-lines.hide {
+            opacity: 0;
+        }
+
+        .checkmark {
+            position: absolute;
+            font-size: 46px;
+            color: var(--green);
+            opacity: 0;
+            transform: scale(0.45);
+        }
+
+        .checkmark.show {
+            animation: checkIn 0.4s ease forwards;
+        }
+
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.78);
+            border: 1px solid var(--line);
+            color: var(--muted);
+            font-size: 13px;
+            margin-bottom: 14px;
+        }
+
+        .status-chip .live-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--green);
+            box-shadow: 0 0 10px rgba(31,122,82,0.6);
+        }
+
+        .success-title {
+            font-size: 29px;
+            font-weight: 700;
+            margin: 8px 0 10px;
+            letter-spacing: -0.02em;
+        }
+
+        .success-text {
+            max-width: 340px;
+            margin: 0 auto;
+            color: var(--muted);
+            line-height: 1.55;
+            font-size: 15px;
+        }
+
+        .reveal-btn {
+            margin-top: 24px;
+            opacity: 0;
+            transform: translateY(16px);
+            pointer-events: none;
+        }
+
+        .reveal-btn.show {
+            animation: revealBtn 0.55s ease forwards;
+            pointer-events: auto;
+        }
+
+        .receipt-card {
+            margin-top: 18px;
+            border-radius: 24px;
             padding: 18px;
-            margin: 20px 0;
-            text-align: left;
-            line-height: 1.7;
+            background:
+                linear-gradient(180deg, rgba(255,255,255,0.97), rgba(248,245,239,0.95));
+            border: 1px solid rgba(71, 60, 40, 0.08);
+            box-shadow:
+                inset 0 1px 0 rgba(255,255,255,0.95),
+                0 18px 40px rgba(54, 42, 24, 0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .receipt-card::before,
+        .receipt-card::after {
+            content: "";
+            position: absolute;
+            top: 50%;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background: var(--bg-soft);
+            transform: translateY(-50%);
+            box-shadow: inset 0 0 0 1px rgba(71,60,40,0.05);
+        }
+
+        .receipt-card::before {
+            left: -11px;
+        }
+
+        .receipt-card::after {
+            right: -11px;
+        }
+
+        .receipt-head {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 12px;
+            padding-bottom: 14px;
+            margin-bottom: 14px;
+            border-bottom: 1px dashed rgba(71,60,40,0.14);
+        }
+
+        .receipt-brand {
+            font-size: 18px;
+            font-weight: 700;
+        }
+
+        .receipt-badge {
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(31,122,82,0.09);
+            color: var(--green);
+            font-size: 13px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .receipt-row {
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            padding: 8px 0;
+            font-size: 15px;
+        }
+
+        .receipt-row span:first-child {
+            color: var(--muted);
+        }
+
+        .receipt-row strong {
+            font-weight: 700;
+        }
+
+        .receipt-total {
+            margin-top: 12px;
+            padding-top: 14px;
+            border-top: 1px dashed rgba(71,60,40,0.14);
+            font-size: 17px;
+        }
+
+        @keyframes drift {
+            0%, 100% { transform: translate(0, 0); }
+            50% { transform: translate(10px, 12px); }
+        }
+
+        @keyframes shine {
+            0% { transform: translateX(-120%); }
+            100% { transform: translateX(120%); }
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(14px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes sweep {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @keyframes checkIn {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes revealBtn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .wrap {
+                padding: 14px 10px 24px;
+            }
+
+            .card {
+                padding: 18px 14px;
+            }
+
+            h1 {
+                font-size: 27px;
+            }
+
+            .hero-amount {
+                font-size: 32px;
+            }
+
+            .progress-wrap {
+                width: 170px;
+                height: 170px;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="container" id="payment-screen">
-        <h2>💰 Оплата заказа</h2>
-        <p class="amount" id="amount">Сумма: 0 ₽</p>
+    <div class="grid"></div>
+    <div class="noise"></div>
+    <div class="orb one"></div>
+    <div class="orb two"></div>
 
-        <button class="sbp" onclick="choosePayment('sbp')">Оплатить через СБП (QR)</button>
-        <button class="card" onclick="choosePayment('card')">Оплатить банковской картой</button>
-        <button class="cash" onclick="choosePayment('cash')">Наличными при получении</button>
-    </div>
+    <div class="wrap">
+        <div class="shell">
+            <div class="card">
+                <section class="screen active" id="payment-screen">
+                    <div class="topbar">
+                        <div class="brand">
+                            <div class="brand-dot"></div>
+                            РАЙПО Слободской
+                        </div>
+                        <div class="secure">Защищённая оплата</div>
+                    </div>
 
-    <div class="container" id="check-screen" style="display: none;">
-        <h2>✅ Чек оплаты</h2>
-        <div class="check" id="check-content"></div>
-        <button class="close" onclick="closeApp()">❌ Закрыть</button>
+                    <h1>Подтверждение оплаты</h1>
+                    <p class="sub">Выберите удобный способ. После подтверждения появится анимированный экран оплаты и электронный чек.</p>
+
+                    <div class="hero">
+                        <div class="hero-label">Сумма заказа</div>
+                        <div class="hero-amount" id="amount">0.00 ₽</div>
+                        <div class="hero-note">Все данные передаются в Telegram Mini App</div>
+                    </div>
+
+                    <div class="method-list">
+                        <button class="pay-btn sbp" onclick="choosePayment('sbp')"><span>Оплатить через СБП</span></button>
+                        <button class="pay-btn card-pay" onclick="choosePayment('card')"><span>Оплатить банковской картой</span></button>
+                        <button class="pay-btn cash" onclick="choosePayment('cash')"><span>Наличными при получении</span></button>
+                    </div>
+                </section>
+
+                <section class="screen" id="success-screen">
+                    <div class="success-stage">
+                        <div class="status-chip">
+                            <div class="live-dot"></div>
+                            Обработка подтверждения
+                        </div>
+
+                        <div class="progress-wrap">
+                            <div class="progress-glow"></div>
+                            <div class="progress-back"></div>
+                            <div class="progress-fill" id="progress-fill"></div>
+                            <div class="progress-inner">
+                                <div class="progress-center">
+                                    <div class="spinner-lines" id="spinner"></div>
+                                    <div class="checkmark" id="checkmark">✓</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="success-title" id="success-title">Подтверждаем платёж</div>
+                        <p class="success-text" id="success-text">Проверяем данные операции и готовим электронный чек.</p>
+
+                        <button class="ghost reveal-btn" id="show-receipt-btn" onclick="showReceipt()">Показать чек</button>
+                    </div>
+                </section>
+
+                <section class="screen" id="receipt-screen">
+                    <h2>Электронный чек</h2>
+                    <div class="receipt-card" id="receipt-content"></div>
+                    <button class="ghost" style="margin-top: 20px;" onclick="closeApp()">Закрыть</button>
+                </section>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -97,58 +686,86 @@
         const params = new URLSearchParams(window.location.search);
         const amount = parseFloat(params.get("amount")) || 0;
 
-        document.getElementById("amount").textContent = `Сумма к оплате: ${amount.toFixed(2)} ₽`;
+        const paymentScreen = document.getElementById("payment-screen");
+        const successScreen = document.getElementById("success-screen");
+        const receiptScreen = document.getElementById("receipt-screen");
+        const amountNode = document.getElementById("amount");
+        const progressFill = document.getElementById("progress-fill");
+        const spinner = document.getElementById("spinner");
+        const checkmark = document.getElementById("checkmark");
+        const successTitle = document.getElementById("success-title");
+        const successText = document.getElementById("success-text");
+        const showReceiptBtn = document.getElementById("show-receipt-btn");
+        const receiptContent = document.getElementById("receipt-content");
+
+        amountNode.textContent = `${amount.toFixed(2)} ₽`;
 
         let selectedMethod = "";
         let paymentSent = false;
+        let receiptHtml = "";
+
+        function switchScreen(nextScreen) {
+            [paymentScreen, successScreen, receiptScreen].forEach(screen => {
+                screen.classList.remove("active");
+            });
+            nextScreen.classList.add("active");
+        }
 
         function choosePayment(method) {
             selectedMethod = method;
 
             const methodNames = {
-                sbp: "СБП (QR-код)",
-                card: "Банковская карта",
-                cash: "Наличными при получении"
+                sbp: "СБП",
+                card: "банковскую карту",
+                cash: "наличные при получении"
             };
 
             tg.showPopup(
                 {
-                    title: "Подтверждение оплаты",
-                    message: `Оплатить ${amount.toFixed(2)} ₽ через ${methodNames[method]}?`,
+                    title: "Подтверждение",
+                    message: `Подтвердить оплату ${amount.toFixed(2)} ₽ через ${methodNames[method]}?`,
                     buttons: [
                         { id: "cancel", type: "cancel" },
-                        { id: "ok", type: "ok" }
+                        { id: "ok", type: "ok", text: "Подтвердить" }
                     ]
                 },
                 function(clicked) {
                     if (clicked === "ok") {
-                        showCheck();
+                        startSuccessFlow();
                     }
                 }
             );
         }
 
-        function showCheck() {
-            const now = new Date();
-            const dateStr = now.toLocaleString("ru-RU");
-
-            const methodNames = {
-                sbp: "СБП (QR)",
+        function startSuccessFlow() {
+            const methodTitles = {
+                sbp: "СБП",
                 card: "Банковская карта",
-                cash: "Наличные при получении"
+                cash: "Наличными при получении"
             };
 
-            const checkHTML = `
-                <strong>Слободское РайПО</strong><br>
-                Дата: ${dateStr}<br><br>
-                Сумма к оплате: <strong>${amount.toFixed(2)} ₽</strong><br>
-                Способ оплаты: ${methodNames[selectedMethod] || selectedMethod}<br><br>
-                <strong>Оплачено успешно ✓</strong>
-            `;
+            progressFill.classList.remove("animate");
+            void progressFill.offsetWidth;
+            progressFill.classList.add("animate");
 
-            document.getElementById("check-content").innerHTML = checkHTML;
-            document.getElementById("payment-screen").style.display = "none";
-            document.getElementById("check-screen").style.display = "block";
+            spinner.classList.remove("hide");
+            checkmark.classList.remove("show");
+            showReceiptBtn.classList.remove("show");
+
+            if (selectedMethod === "cash") {
+                successTitle.textContent = "Оформляем заказ";
+                successText.textContent = "Заказ принят. Оплата будет произведена при получении, сейчас подготовим чек.";
+            } else {
+                successTitle.textContent = "Подтверждаем платёж";
+                successText.textContent = "Проверяем данные операции и готовим электронный чек.";
+            }
+
+            buildReceipt(methodTitles[selectedMethod] || selectedMethod);
+            switchScreen(successScreen);
+
+            if (tg.HapticFeedback) {
+                tg.HapticFeedback.impactOccurred("medium");
+            }
 
             if (!paymentSent) {
                 tg.sendData(JSON.stringify({
@@ -158,6 +775,68 @@
                 }));
                 paymentSent = true;
             }
+
+            setTimeout(() => {
+                spinner.classList.add("hide");
+                checkmark.classList.add("show");
+
+                if (tg.HapticFeedback) {
+                    tg.HapticFeedback.notificationOccurred("success");
+                }
+
+                if (selectedMethod === "cash") {
+                    successTitle.textContent = "Заказ подтверждён";
+                    successText.textContent = "Всё готово. Вы можете открыть чек и посмотреть детали заказа.";
+                } else {
+                    successTitle.textContent = "Платёж успешно выполнен";
+                    successText.textContent = "Операция завершена. Электронный чек уже готов к просмотру.";
+                }
+            }, 1700);
+
+            setTimeout(() => {
+                showReceiptBtn.classList.add("show");
+            }, 2150);
+        }
+
+        function buildReceipt(methodName) {
+            const now = new Date();
+            const dateStr = now.toLocaleString("ru-RU");
+            const paymentStatus = selectedMethod === "cash" ? "Не оплачено" : "Оплачено";
+            const paymentResult = selectedMethod === "cash"
+                ? "Оплата при получении"
+                : "Операция успешно завершена";
+
+            receiptHtml = `
+                <div class="receipt-head">
+                    <div>
+                        <div class="receipt-brand">Слободское РайПО</div>
+                        <div style="color:#6c6257; font-size:14px; margin-top:4px;">Электронный чек</div>
+                    </div>
+                    <div class="receipt-badge">${paymentStatus}</div>
+                </div>
+
+                <div class="receipt-row">
+                    <span>Дата</span>
+                    <strong>${dateStr}</strong>
+                </div>
+                <div class="receipt-row">
+                    <span>Способ оплаты</span>
+                    <strong>${methodName}</strong>
+                </div>
+                <div class="receipt-row">
+                    <span>Статус операции</span>
+                    <strong>${paymentResult}</strong>
+                </div>
+                <div class="receipt-row receipt-total">
+                    <span>Сумма</span>
+                    <strong>${amount.toFixed(2)} ₽</strong>
+                </div>
+            `;
+        }
+
+        function showReceipt() {
+            receiptContent.innerHTML = receiptHtml;
+            switchScreen(receiptScreen);
         }
 
         function closeApp() {
