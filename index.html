@@ -701,7 +701,6 @@
         amountNode.textContent = `${amount.toFixed(2)} ₽`;
 
         let selectedMethod = "";
-        let paymentSent = false;
         let receiptHtml = "";
 
         function switchScreen(nextScreen) {
@@ -765,15 +764,6 @@
 
             if (tg.HapticFeedback) {
                 tg.HapticFeedback.impactOccurred("medium");
-            }
-
-            if (!paymentSent) {
-                tg.sendData(JSON.stringify({
-                    status: "paid",
-                    amount: amount,
-                    payment_method: selectedMethod
-                }));
-                paymentSent = true;
             }
 
             setTimeout(() => {
@@ -840,7 +830,11 @@
         }
 
         function closeApp() {
-            tg.close();
+            tg.sendData(JSON.stringify({
+                status: "paid",
+                amount: amount,
+                payment_method: selectedMethod
+            }));
         }
     </script>
 </body>
