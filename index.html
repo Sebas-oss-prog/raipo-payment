@@ -21,11 +21,11 @@
             margin: 0 auto;
         }
         h2 { color: #2e7d32; text-align: center; }
-        .amount {
-            font-size: 28px;
-            font-weight: bold;
-            text-align: center;
-            color: #1b5e20;
+        .amount { 
+            font-size: 28px; 
+            font-weight: bold; 
+            text-align: center; 
+            color: #1b5e20; 
             margin: 15px 0;
         }
         .check {
@@ -57,7 +57,7 @@
     <div class="container" id="payment-screen">
         <h2>💰 Оплата заказа</h2>
         <p class="amount" id="amount">Сумма: 0 ₽</p>
-
+        
         <button class="sbp" onclick="choosePayment('sbp')">Оплатить через СБП (QR)</button>
         <button class="card" onclick="choosePayment('card')">Оплатить банковской картой</button>
         <button class="cash" onclick="choosePayment('cash')">Наличными при получении</button>
@@ -103,12 +103,12 @@
 
         function showCheck() {
             const now = new Date();
-            const dateStr = now.toLocaleString('ru-RU', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
+            const dateStr = now.toLocaleString('ru-RU', { 
+                day: '2-digit', 
+                month: '2-digit', 
+                year: 'numeric', 
+                hour: '2-digit', 
+                minute: '2-digit' 
             });
 
             const methodNames = {
