@@ -6,70 +6,87 @@
     <title>Оплата — Слободское РайПО</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { 
-            font-family: Arial, sans-serif; 
-            background: #f5f5f5; 
-            margin: 0; 
-            padding: 15px; 
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            margin: 0;
+            padding: 15px;
         }
-        .container { 
-            background: white; 
-            border-radius: 16px; 
-            padding: 25px; 
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
-            text-align: center; 
+
+        .container {
+            background: white;
+            border-radius: 16px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 500px;
+            margin: 0 auto;
         }
-        h2 { color: #2e7d32; }
-        .amount { 
-            font-size: 28px; 
-            font-weight: bold; 
-            color: #1b5e20; 
-            margin: 15px 0; 
+
+        h2 {
+            color: #2e7d32;
         }
-        button { 
-            width: 100%; 
-            padding: 16px; 
-            margin: 12px 0; 
-            font-size: 17px; 
-            border: none; 
-            border-radius: 12px; 
-            color: white; 
-            cursor: pointer; 
+
+        .amount {
+            font-size: 28px;
+            font-weight: bold;
+            color: #1b5e20;
+            margin: 15px 0;
         }
-        .sbp  { background: #4caf50; }
-        .card { background: #2196f3; }
-        .cash { background: #ff9800; }
-        .close { 
-            background: #666; 
-            margin-top: 30px; 
+
+        button {
+            width: 100%;
+            padding: 16px;
+            margin: 12px 0;
+            font-size: 17px;
+            border: none;
+            border-radius: 12px;
+            color: white;
+            cursor: pointer;
         }
-        .check { 
-            background: #f9f9f9; 
-            border: 2px dashed #2e7d32; 
-            border-radius: 12px; 
-            padding: 18px; 
-            margin: 20px 0; 
-            text-align: left; 
-            line-height: 1.7; 
+
+        .sbp {
+            background: #4caf50;
+        }
+
+        .card {
+            background: #2196f3;
+        }
+
+        .cash {
+            background: #ff9800;
+        }
+
+        .close {
+            background: #666;
+            margin-top: 30px;
+        }
+
+        .check {
+            background: #f9f9f9;
+            border: 2px dashed #2e7d32;
+            border-radius: 12px;
+            padding: 18px;
+            margin: 20px 0;
+            text-align: left;
+            line-height: 1.7;
         }
     </style>
 </head>
 <body>
-    <!-- Экран выбора способа оплаты -->
     <div class="container" id="payment-screen">
         <h2>💰 Оплата заказа</h2>
         <p class="amount" id="amount">Сумма: 0 ₽</p>
-        
+
         <button class="sbp" onclick="choosePayment('sbp')">Оплатить через СБП (QR)</button>
         <button class="card" onclick="choosePayment('card')">Оплатить банковской картой</button>
         <button class="cash" onclick="choosePayment('cash')">Наличными при получении</button>
     </div>
 
-    <!-- Экран чека -->
     <div class="container" id="check-screen" style="display: none;">
         <h2>✅ Чек оплаты</h2>
         <div class="check" id="check-content"></div>
-        
+
         <button class="close" onclick="closeApp()">❌ Закрыть</button>
     </div>
 
@@ -79,27 +96,28 @@
         tg.expand();
 
         const params = new URLSearchParams(window.location.search);
-        const amount = parseFloat(params.get('amount')) || 0;
-        const orderId = params.get('order_id') || 'TMP-' + Date.now();
+        const amount = parseFloat(params.get("amount")) || 0;
 
-        document.getElementById('amount').textContent = `Сумма к оплате: ${amount} ₽`;
+        document.getElementById("amount").textContent = `Сумма к оплате: ${amount.toFixed(2)} ₽`;
 
-        let selectedMethod = '';
+        let selectedMethod = "";
+        let paymentSent = false;
 
         function choosePayment(method) {
             selectedMethod = method;
+
             const methodNames = {
-                'sbp': 'СБП (QR-код)',
-                'card': 'Банковская карта',
-                'cash': 'Наличными при получении'
+                sbp: "СБП (QR-код)",
+                card: "Банковская карта",
+                cash: "Наличными при получении"
             };
 
             tg.showPopup({
                 title: "Подтверждение оплаты",
-                message: `Оплатить ${amount} ₽ через ${methodNames[method]}?`,
+                message: `Оплатить ${amount.toFixed(2)} ₽ через ${methodNames[method]}?`,
                 buttons: [
-                    {id: "cancel", type: "cancel"},
-                    {id: "ok", type: "ok"}
+                    { id: "cancel", type: "cancel" },
+                    { id: "ok", type: "ok" }
                 ]
             }, function(clicked) {
                 if (clicked === "ok") {
@@ -110,26 +128,34 @@
 
         function showCheck() {
             const now = new Date();
-            const dateStr = now.toLocaleString('ru-RU');
+            const dateStr = now.toLocaleString("ru-RU");
 
             const methodNames = {
-                'sbp': 'СБП (QR)',
-                'card': 'Банковская карта',
-                'cash': 'Наличные при получении'
+                sbp: "СБП (QR)",
+                card: "Банковская карта",
+                cash: "Наличные при получении"
             };
 
             const checkHTML = `
                 <strong>Слободское РайПО</strong><br>
-                Чек № ${orderId}<br>
                 Дата: ${dateStr}<br><br>
-                Сумма к оплате: <strong>${amount} ₽</strong><br>
+                Сумма к оплате: <strong>${amount.toFixed(2)} ₽</strong><br>
                 Способ оплаты: ${methodNames[selectedMethod] || selectedMethod}<br><br>
                 <strong>Оплачено успешно ✓</strong>
             `;
 
-            document.getElementById('check-content').innerHTML = checkHTML;
-            document.getElementById('payment-screen').style.display = 'none';
-            document.getElementById('check-screen').style.display = 'block';
+            document.getElementById("check-content").innerHTML = checkHTML;
+            document.getElementById("payment-screen").style.display = "none";
+            document.getElementById("check-screen").style.display = "block";
+
+            if (!paymentSent) {
+                tg.sendData(JSON.stringify({
+                    status: "paid",
+                    amount: amount,
+                    payment_method: selectedMethod
+                }));
+                paymentSent = true;
+            }
         }
 
         function closeApp() {
