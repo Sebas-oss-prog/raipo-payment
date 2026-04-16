@@ -6,14 +6,30 @@
     <title>Оплата — Слободское РайПО</title>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; background: #f5f5f5; margin: 0; padding: 15px; }
-        .container { background: white; border-radius: 16px; padding: 20px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); text-align: center; }
+        body { 
+            font-family: Arial, sans-serif; 
+            background: #f5f5f5; 
+            margin: 0; 
+            padding: 15px; 
+        }
+        .container { 
+            background: white; 
+            border-radius: 16px; 
+            padding: 25px; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1); 
+            text-align: center; 
+        }
         h2 { color: #2e7d32; }
-        .amount { font-size: 28px; font-weight: bold; color: #1b5e20; margin: 15px 0; }
+        .amount { 
+            font-size: 28px; 
+            font-weight: bold; 
+            color: #1b5e20; 
+            margin: 15px 0; 
+        }
         button { 
             width: 100%; 
             padding: 16px; 
-            margin: 10px 0; 
+            margin: 12px 0; 
             font-size: 17px; 
             border: none; 
             border-radius: 12px; 
@@ -23,9 +39,19 @@
         .sbp  { background: #4caf50; }
         .card { background: #2196f3; }
         .cash { background: #ff9800; }
-        .send { background: #2e7d32; margin-top: 20px; }
-        .close { background: #666; }
-        .check { background: #f9f9f9; border: 2px dashed #2e7d32; border-radius: 12px; padding: 15px; margin: 20px 0; text-align: left; line-height: 1.6; }
+        .close { 
+            background: #666; 
+            margin-top: 30px; 
+        }
+        .check { 
+            background: #f9f9f9; 
+            border: 2px dashed #2e7d32; 
+            border-radius: 12px; 
+            padding: 18px; 
+            margin: 20px 0; 
+            text-align: left; 
+            line-height: 1.7; 
+        }
     </style>
 </head>
 <body>
@@ -39,12 +65,11 @@
         <button class="cash" onclick="choosePayment('cash')">Наличными при получении</button>
     </div>
 
-    <!-- Экран чека (скрыт по умолчанию) -->
+    <!-- Экран чека -->
     <div class="container" id="check-screen" style="display: none;">
         <h2>✅ Чек оплаты</h2>
         <div class="check" id="check-content"></div>
         
-        <button class="send" onclick="sendCheckToBot()">📤 Отправить чек в бот</button>
         <button class="close" onclick="closeApp()">❌ Закрыть</button>
     </div>
 
@@ -70,7 +95,7 @@
             };
 
             tg.showPopup({
-                title: "Подтверждение",
+                title: "Подтверждение оплаты",
                 message: `Оплатить ${amount} ₽ через ${methodNames[method]}?`,
                 buttons: [
                     {id: "cancel", type: "cancel"},
@@ -105,22 +130,6 @@
             document.getElementById('check-content').innerHTML = checkHTML;
             document.getElementById('payment-screen').style.display = 'none';
             document.getElementById('check-screen').style.display = 'block';
-        }
-
-        function sendCheckToBot() {
-            tg.MainButton.setText("Отправляем...");
-            tg.MainButton.show();
-
-            const data = {
-                status: "success",
-                amount: amount,
-                order_id: orderId,
-                payment_method: selectedMethod,
-                timestamp: Date.now()
-            };
-
-            tg.sendData(JSON.stringify(data));
-            tg.close();
         }
 
         function closeApp() {
