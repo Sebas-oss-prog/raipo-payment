@@ -4,7 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Оплата — Слободское РайПО</title>
+
+    <!-- Telegram Mini App SDK (в VK/обычном браузере может быть недоступен, это нормально) -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
     <style>
         :root {
             --bg: #f4f1ea;
@@ -26,9 +29,7 @@
             --radius-md: 18px;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
         body {
             margin: 0;
@@ -42,13 +43,7 @@
             overflow-x: hidden;
         }
 
-        .noise,
-        .orb,
-        .grid {
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-        }
+        .noise, .orb, .grid { position: fixed; inset: 0; pointer-events: none; }
 
         .grid {
             background-image:
@@ -68,10 +63,7 @@
             background-size: 26px 26px;
         }
 
-        .orb {
-            filter: blur(40px);
-            opacity: 0.55;
-        }
+        .orb { filter: blur(40px); opacity: 0.55; }
 
         .orb.one {
             inset: auto auto -60px -80px;
@@ -116,14 +108,8 @@
             border: 1px solid rgba(255,255,255,0.65);
         }
 
-        .screen {
-            display: none;
-            animation: fadeUp 0.45s ease;
-        }
-
-        .screen.active {
-            display: block;
-        }
+        .screen { display: none; animation: fadeUp 0.45s ease; }
+        .screen.active { display: block; }
 
         .topbar {
             display: flex;
@@ -162,27 +148,11 @@
             border: 1px solid var(--line);
         }
 
-        h1, h2 {
-            margin: 0;
-            line-height: 1.14;
-            letter-spacing: -0.02em;
-        }
+        h1, h2 { margin: 0; line-height: 1.14; letter-spacing: -0.02em; }
+        h1 { font-size: 31px; }
+        h2 { font-size: 27px; text-align: center; }
 
-        h1 {
-            font-size: 31px;
-        }
-
-        h2 {
-            font-size: 27px;
-            text-align: center;
-        }
-
-        .sub {
-            margin: 12px 0 0;
-            color: var(--muted);
-            font-size: 15px;
-            line-height: 1.5;
-        }
+        .sub { margin: 12px 0 0; color: var(--muted); font-size: 15px; line-height: 1.5; }
 
         .hero {
             margin-top: 18px;
@@ -217,34 +187,11 @@
             background: rgba(255,255,255,0.08);
         }
 
-        .hero-label {
-            font-size: 13px;
-            opacity: 0.84;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-        }
+        .hero-label { font-size: 13px; opacity: 0.84; text-transform: uppercase; letter-spacing: 0.08em; }
+        .hero-amount { margin-top: 12px; font-size: 36px; font-weight: 700; position: relative; z-index: 1; }
+        .hero-note { margin-top: 8px; font-size: 14px; opacity: 0.9; position: relative; z-index: 1; }
 
-        .hero-amount {
-            margin-top: 12px;
-            font-size: 36px;
-            font-weight: 700;
-            position: relative;
-            z-index: 1;
-        }
-
-        .hero-note {
-            margin-top: 8px;
-            font-size: 14px;
-            opacity: 0.9;
-            position: relative;
-            z-index: 1;
-        }
-
-        .method-list {
-            display: grid;
-            gap: 12px;
-            margin-top: 18px;
-        }
+        .method-list { display: grid; gap: 12px; margin-top: 18px; }
 
         button {
             width: 100%;
@@ -257,17 +204,9 @@
             transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
         }
 
-        button:active {
-            transform: scale(0.985);
-        }
+        button:active { transform: scale(0.985); }
 
-        .pay-btn {
-            color: white;
-            text-align: left;
-            position: relative;
-            overflow: hidden;
-        }
-
+        .pay-btn { color: white; text-align: left; position: relative; overflow: hidden; }
         .pay-btn::after {
             content: "";
             position: absolute;
@@ -276,57 +215,20 @@
             transform: translateX(-100%);
             animation: shine 3.2s linear infinite;
         }
+        .pay-btn span { position: relative; z-index: 1; }
 
-        .pay-btn span {
-            position: relative;
-            z-index: 1;
-        }
+        .sbp { background: linear-gradient(135deg, #2f9863, #1f7a52); box-shadow: 0 14px 28px rgba(31, 122, 82, 0.22); }
+        .card-pay { background: linear-gradient(135deg, #315ba3, #234c8c); box-shadow: 0 14px 28px rgba(35, 76, 140, 0.22); }
+        .cash { background: linear-gradient(135deg, #ca8a2e, #b8771b); box-shadow: 0 14px 28px rgba(184, 119, 27, 0.22); }
+        .ghost { background: linear-gradient(135deg, #4f5761, #3f4750); color: white; box-shadow: 0 14px 28px rgba(63, 71, 80, 0.2); }
 
-        .sbp {
-            background: linear-gradient(135deg, #2f9863, #1f7a52);
-            box-shadow: 0 14px 28px rgba(31, 122, 82, 0.22);
-        }
+        .success-stage { text-align: center; padding: 10px 4px 6px; }
 
-        .card-pay {
-            background: linear-gradient(135deg, #315ba3, #234c8c);
-            box-shadow: 0 14px 28px rgba(35, 76, 140, 0.22);
-        }
+        .progress-wrap { position: relative; width: 188px; height: 188px; margin: 10px auto 20px; }
 
-        .cash {
-            background: linear-gradient(135deg, #ca8a2e, #b8771b);
-            box-shadow: 0 14px 28px rgba(184, 119, 27, 0.22);
-        }
+        .progress-back, .progress-fill, .progress-inner, .progress-glow { position: absolute; inset: 0; border-radius: 50%; }
 
-        .ghost {
-            background: linear-gradient(135deg, #4f5761, #3f4750);
-            color: white;
-            box-shadow: 0 14px 28px rgba(63, 71, 80, 0.2);
-        }
-
-        .success-stage {
-            text-align: center;
-            padding: 10px 4px 6px;
-        }
-
-        .progress-wrap {
-            position: relative;
-            width: 188px;
-            height: 188px;
-            margin: 10px auto 20px;
-        }
-
-        .progress-back,
-        .progress-fill,
-        .progress-inner,
-        .progress-glow {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-        }
-
-        .progress-back {
-            background: conic-gradient(from -90deg, rgba(0,0,0,0.05), rgba(0,0,0,0.05));
-        }
+        .progress-back { background: conic-gradient(from -90deg, rgba(0,0,0,0.05), rgba(0,0,0,0.05)); }
 
         .progress-fill {
             background: conic-gradient(
@@ -343,19 +245,12 @@
             transform: rotate(0deg);
         }
 
-        .progress-fill.animate {
-            animation: sweep 1.7s cubic-bezier(.25,.9,.25,1) forwards;
-        }
+        .progress-fill.animate { animation: sweep 1.7s cubic-bezier(.25,.9,.25,1) forwards; }
 
         .progress-glow {
             filter: blur(14px);
             opacity: 0.45;
-            background: conic-gradient(
-                from -90deg,
-                rgba(201,169,107,0.8),
-                rgba(61,166,118,0.9),
-                rgba(201,169,107,0.8)
-            );
+            background: conic-gradient(from -90deg, rgba(201,169,107,0.8), rgba(61,166,118,0.9), rgba(201,169,107,0.8));
             mask: radial-gradient(farthest-side, transparent calc(100% - 18px), black 0);
             -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 18px), black 0);
         }
@@ -366,9 +261,7 @@
                 radial-gradient(circle at 30% 30%, rgba(255,255,255,0.95), rgba(255,255,255,0.78)),
                 linear-gradient(180deg, rgba(255,255,255,0.92), rgba(242,238,231,0.95));
             border: 1px solid rgba(255,255,255,0.8);
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.9),
-                0 20px 36px rgba(58, 47, 31, 0.12);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.9), 0 20px 36px rgba(58, 47, 31, 0.12);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -383,9 +276,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.95),
-                0 12px 22px rgba(71,60,40,0.08);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 12px 22px rgba(71,60,40,0.08);
             position: relative;
             overflow: hidden;
         }
@@ -400,9 +291,7 @@
             transition: opacity 0.25s ease;
         }
 
-        .spinner-lines.hide {
-            opacity: 0;
-        }
+        .spinner-lines.hide { opacity: 0; }
 
         .checkmark {
             position: absolute;
@@ -412,9 +301,7 @@
             transform: scale(0.45);
         }
 
-        .checkmark.show {
-            animation: checkIn 0.4s ease forwards;
-        }
+        .checkmark.show { animation: checkIn 0.4s ease forwards; }
 
         .status-chip {
             display: inline-flex;
@@ -437,49 +324,24 @@
             box-shadow: 0 0 10px rgba(31,122,82,0.6);
         }
 
-        .success-title {
-            font-size: 29px;
-            font-weight: 700;
-            margin: 8px 0 10px;
-            letter-spacing: -0.02em;
-        }
+        .success-title { font-size: 29px; font-weight: 700; margin: 8px 0 10px; letter-spacing: -0.02em; }
+        .success-text { max-width: 340px; margin: 0 auto; color: var(--muted); line-height: 1.55; font-size: 15px; }
 
-        .success-text {
-            max-width: 340px;
-            margin: 0 auto;
-            color: var(--muted);
-            line-height: 1.55;
-            font-size: 15px;
-        }
-
-        .reveal-btn {
-            margin-top: 24px;
-            opacity: 0;
-            transform: translateY(16px);
-            pointer-events: none;
-        }
-
-        .reveal-btn.show {
-            animation: revealBtn 0.55s ease forwards;
-            pointer-events: auto;
-        }
+        .reveal-btn { margin-top: 24px; opacity: 0; transform: translateY(16px); pointer-events: none; }
+        .reveal-btn.show { animation: revealBtn 0.55s ease forwards; pointer-events: auto; }
 
         .receipt-card {
             margin-top: 18px;
             border-radius: 24px;
             padding: 18px;
-            background:
-                linear-gradient(180deg, rgba(255,255,255,0.97), rgba(248,245,239,0.95));
+            background: linear-gradient(180deg, rgba(255,255,255,0.97), rgba(248,245,239,0.95));
             border: 1px solid rgba(71, 60, 40, 0.08);
-            box-shadow:
-                inset 0 1px 0 rgba(255,255,255,0.95),
-                0 18px 40px rgba(54, 42, 24, 0.08);
+            box-shadow: inset 0 1px 0 rgba(255,255,255,0.95), 0 18px 40px rgba(54, 42, 24, 0.08);
             position: relative;
             overflow: hidden;
         }
 
-        .receipt-card::before,
-        .receipt-card::after {
+        .receipt-card::before, .receipt-card::after {
             content: "";
             position: absolute;
             top: 50%;
@@ -491,13 +353,8 @@
             box-shadow: inset 0 0 0 1px rgba(71,60,40,0.05);
         }
 
-        .receipt-card::before {
-            left: -11px;
-        }
-
-        .receipt-card::after {
-            right: -11px;
-        }
+        .receipt-card::before { left: -11px; }
+        .receipt-card::after { right: -11px; }
 
         .receipt-head {
             display: flex;
@@ -509,10 +366,7 @@
             border-bottom: 1px dashed rgba(71,60,40,0.14);
         }
 
-        .receipt-brand {
-            font-size: 18px;
-            font-weight: 700;
-        }
+        .receipt-brand { font-size: 18px; font-weight: 700; }
 
         .receipt-badge {
             padding: 8px 12px;
@@ -524,88 +378,26 @@
             white-space: nowrap;
         }
 
-        .receipt-row {
-            display: flex;
-            justify-content: space-between;
-            gap: 16px;
-            padding: 8px 0;
-            font-size: 15px;
-        }
+        .receipt-row { display: flex; justify-content: space-between; gap: 16px; padding: 8px 0; font-size: 15px; }
+        .receipt-row span:first-child { color: var(--muted); }
+        .receipt-row strong { font-weight: 700; }
 
-        .receipt-row span:first-child {
-            color: var(--muted);
-        }
+        .receipt-total { margin-top: 12px; padding-top: 14px; border-top: 1px dashed rgba(71,60,40,0.14); font-size: 17px; }
 
-        .receipt-row strong {
-            font-weight: 700;
-        }
-
-        .receipt-total {
-            margin-top: 12px;
-            padding-top: 14px;
-            border-top: 1px dashed rgba(71,60,40,0.14);
-            font-size: 17px;
-        }
-
-        @keyframes drift {
-            0%, 100% { transform: translate(0, 0); }
-            50% { transform: translate(10px, 12px); }
-        }
-
-        @keyframes shine {
-            0% { transform: translateX(-120%); }
-            100% { transform: translateX(120%); }
-        }
-
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(14px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        @keyframes sweep {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes checkIn {
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-
-        @keyframes revealBtn {
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+        @keyframes drift { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(10px, 12px); } }
+        @keyframes shine { 0% { transform: translateX(-120%); } 100% { transform: translateX(120%); } }
+        @keyframes fadeUp { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes checkIn { to { opacity: 1; transform: scale(1); } }
+        @keyframes revealBtn { to { opacity: 1; transform: translateY(0); } }
 
         @media (max-width: 480px) {
-            .wrap {
-                padding: 14px 10px 24px;
-            }
-
-            .card {
-                padding: 18px 14px;
-            }
-
-            h1 {
-                font-size: 27px;
-            }
-
-            .hero-amount {
-                font-size: 32px;
-            }
-
-            .progress-wrap {
-                width: 170px;
-                height: 170px;
-            }
+            .wrap { padding: 14px 10px 24px; }
+            .card { padding: 18px 14px; }
+            h1 { font-size: 27px; }
+            .hero-amount { font-size: 32px; }
+            .progress-wrap { width: 170px; height: 170px; }
         }
     </style>
 </head>
@@ -633,13 +425,13 @@
                     <div class="hero">
                         <div class="hero-label">Сумма заказа</div>
                         <div class="hero-amount" id="amount">0.00 ₽</div>
-                        <div class="hero-note">Все данные передаются в Telegram Mini App</div>
+                        <div class="hero-note" id="env-note">Все данные передаются в Telegram Mini App</div>
                     </div>
 
                     <div class="method-list">
-                        <button class="pay-btn sbp" onclick="choosePayment('sbp')"><span>Оплатить через СБП</span></button>
-                        <button class="pay-btn card-pay" onclick="choosePayment('card')"><span>Оплатить банковской картой</span></button>
-                        <button class="pay-btn cash" onclick="choosePayment('cash')"><span>Наличными при получении</span></button>
+                        <button class="pay-btn sbp" id="btn-sbp"><span>Оплатить через СБП</span></button>
+                        <button class="pay-btn card-pay" id="btn-card"><span>Оплатить банковской картой</span></button>
+                        <button class="pay-btn cash" id="btn-cash"><span>Наличными при получении</span></button>
                     </div>
                 </section>
 
@@ -665,23 +457,52 @@
                         <div class="success-title" id="success-title">Подтверждаем платёж</div>
                         <p class="success-text" id="success-text">Проверяем данные операции и готовим электронный чек.</p>
 
-                        <button class="ghost reveal-btn" id="show-receipt-btn" onclick="showReceipt()">Показать чек</button>
+                        <button class="ghost reveal-btn" id="show-receipt-btn">Показать чек</button>
                     </div>
                 </section>
 
                 <section class="screen" id="receipt-screen">
                     <h2>Электронный чек</h2>
                     <div class="receipt-card" id="receipt-content"></div>
-                    <button class="ghost" style="margin-top: 20px;" onclick="closeApp()">Закрыть</button>
+                    <button class="ghost" style="margin-top: 20px;" id="btn-close">Закрыть</button>
                 </section>
             </div>
         </div>
     </div>
 
     <script>
-        const tg = window.Telegram.WebApp;
-        tg.ready();
-        tg.expand();
+        // Безопасный доступ к Telegram WebApp API:
+        // В VK/обычном браузере window.Telegram может отсутствовать => раньше из-за этого падал весь JS и кнопки "не работали".
+        const tg = (window.Telegram && window.Telegram.WebApp) ? window.Telegram.WebApp : null;
+
+        function safeReady() {
+            try {
+                if (tg) { tg.ready(); tg.expand(); }
+            } catch (e) {}
+        }
+
+        function safePopup(opts, cb) {
+            try {
+                if (tg && typeof tg.showPopup === "function") {
+                    tg.showPopup(opts, cb);
+                    return;
+                }
+            } catch (e) {}
+            // fallback
+            const ok = window.confirm((opts && opts.message) ? opts.message : "Подтвердить?");
+            cb(ok ? "ok" : "cancel");
+        }
+
+        function safeHaptic(type, arg) {
+            try {
+                if (tg && tg.HapticFeedback) {
+                    if (type === "impact") tg.HapticFeedback.impactOccurred(arg || "medium");
+                    if (type === "notify") tg.HapticFeedback.notificationOccurred(arg || "success");
+                }
+            } catch (e) {}
+        }
+
+        safeReady();
 
         const params = new URLSearchParams(window.location.search);
         const amount = parseFloat(params.get("amount")) || 0;
@@ -690,6 +511,8 @@
         const successScreen = document.getElementById("success-screen");
         const receiptScreen = document.getElementById("receipt-screen");
         const amountNode = document.getElementById("amount");
+        const envNote = document.getElementById("env-note");
+
         const progressFill = document.getElementById("progress-fill");
         const spinner = document.getElementById("spinner");
         const checkmark = document.getElementById("checkmark");
@@ -699,6 +522,11 @@
         const receiptContent = document.getElementById("receipt-content");
 
         amountNode.textContent = `${amount.toFixed(2)} ₽`;
+
+        // Подсказка в зависимости от окружения
+        if (!tg) {
+            envNote.textContent = "Вы открыли страницу вне Telegram. Подтверждение произойдёт на странице.";
+        }
 
         let selectedMethod = "";
         let receiptHtml = "";
@@ -719,7 +547,7 @@
                 cash: "наличные при получении"
             };
 
-            tg.showPopup(
+            safePopup(
                 {
                     title: "Подтверждение",
                     message: `Подтвердить оплату ${amount.toFixed(2)} ₽ через ${methodNames[method]}?`,
@@ -729,9 +557,7 @@
                     ]
                 },
                 function(clicked) {
-                    if (clicked === "ok") {
-                        startSuccessFlow();
-                    }
+                    if (clicked === "ok") startSuccessFlow();
                 }
             );
         }
@@ -762,17 +588,12 @@
             buildReceipt(methodTitles[selectedMethod] || selectedMethod);
             switchScreen(successScreen);
 
-            if (tg.HapticFeedback) {
-                tg.HapticFeedback.impactOccurred("medium");
-            }
+            safeHaptic("impact", "medium");
 
             setTimeout(() => {
                 spinner.classList.add("hide");
                 checkmark.classList.add("show");
-
-                if (tg.HapticFeedback) {
-                    tg.HapticFeedback.notificationOccurred("success");
-                }
+                safeHaptic("notify", "success");
 
                 if (selectedMethod === "cash") {
                     successTitle.textContent = "Заказ подтверждён";
@@ -830,12 +651,31 @@
         }
 
         function closeApp() {
-            tg.sendData(JSON.stringify({
+            const payload = JSON.stringify({
                 status: "paid",
                 amount: amount,
                 payment_method: selectedMethod
-            }));
+            });
+
+            // В Telegram Mini App отправляем данные боту
+            try {
+                if (tg && typeof tg.sendData === "function") {
+                    tg.sendData(payload);
+                    return;
+                }
+            } catch (e) {}
+
+            // Вне Telegram просто показываем итог (VK/браузер)
+            alert("Готово. Данные подтверждения:\n" + payload);
+            try { window.close(); } catch (e) {}
         }
+
+        // Навешиваем обработчики (надежнее, чем inline onclick в некоторых WebView)
+        document.getElementById("btn-sbp").addEventListener("click", () => choosePayment("sbp"));
+        document.getElementById("btn-card").addEventListener("click", () => choosePayment("card"));
+        document.getElementById("btn-cash").addEventListener("click", () => choosePayment("cash"));
+        document.getElementById("show-receipt-btn").addEventListener("click", showReceipt);
+        document.getElementById("btn-close").addEventListener("click", closeApp);
     </script>
 </body>
 </html>
