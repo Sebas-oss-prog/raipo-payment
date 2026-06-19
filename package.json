@@ -1,0 +1,10 @@
+{
+  "name": "slobodskoy-raipo-miniapp",
+  "private": true,
+  "scripts": {
+    "deploy": "vk-miniapps-deploy"
+  },
+  "devDependencies": {
+    "@vkontakte/vk-miniapps-deploy": "latest"
+  }
+}

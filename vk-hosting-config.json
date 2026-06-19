@@ -1,0 +1,9 @@
+{
+  "static_path": "raipo-payment-app",
+  "app_id": 54575435,
+  "endpoints": {
+    "mobile": "index.html",
+    "mvk": "index.html",
+    "web": "index.html"
+  }
+}
