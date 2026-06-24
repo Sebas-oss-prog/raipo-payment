@@ -1219,8 +1219,21 @@ class Repo:
         contractor_id = int(contractor.get("id") or order.get("contractor_id") or 0)
         if not order_id or not contractor_id:
             raise ValueError("Заказ или контрагент не определён")
+        items = items or self.list_order_items(order_id)
+        order_number = order.get("order_number") or format_order_number(order_id)
         existing = self.get_contractor_document(contractor_id, order_id, document_type, status="active")
         if existing:
+            file_name = Path(str(existing.get("file_name") or f"{safe_document_name(f'{document_type}_{order_number}')}.pdf")).name
+            file_path = DOCUMENT_DIR / file_name
+            if not file_path.exists():
+                if document_type == "invoice":
+                    file_path.write_bytes(build_invoice_pdf(order, contractor, items))
+                elif document_type == "waybill":
+                    file_path.write_bytes(build_waybill_pdf(order, contractor, items))
+                else:
+                    raise ValueError("Неподдерживаемый тип документа")
+                existing["file_name"] = file_name
+                existing["file_url"] = existing.get("file_url") or build_document_file_url(file_name)
             if document_type == "invoice" and order.get("invoice_pdf_url") != existing.get("file_url"):
                 try:
                     self.attach_invoice(order_id, existing.get("file_url"))
@@ -1231,8 +1244,6 @@ class Repo:
                 order["waybill_pdf_url"] = existing.get("file_url")
             return existing
 
-        items = items or self.list_order_items(order_id)
-        order_number = order.get("order_number") or format_order_number(order_id)
         if document_type == "invoice":
             file_name = f"{safe_document_name(f'invoice_{order_number}')}.pdf"
             file_path = DOCUMENT_DIR / file_name
@@ -1778,9 +1789,9 @@ def process_waybill_request_send(request_id: int) -> Dict[str, Any]:
         raise LookupError("Заказ не найден")
     items = repo.list_order_items(order_id)
     waybill_document = repo.get_or_create_order_document(order, contractor, "waybill", items)
-    file_path = DOCUMENT_DIR / str(waybill_document.get("file_name") or "")
+    file_path = DOCUMENT_DIR / Path(str(waybill_document.get("file_name") or "")).name
     if not file_path.exists():
-        raise FileNotFoundError("Файл накладной не найден")
+        file_path.write_bytes(build_waybill_pdf(order, contractor, items))
     order_number = order.get("order_number") or format_order_number(order_id)
     title = waybill_document.get("title") or f"Товарная накладная по заявке {order_number}"
     message = (
